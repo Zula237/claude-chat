@@ -1,0 +1,118 @@
+/* ── Reset & Base ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  height: 100%;
+  background: #010803;
+  color: #00cc66;
+  font-family: 'Courier New', Courier, monospace;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; background: #010803; }
+::-webkit-scrollbar-thumb { background: #0a3a18; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #0a5a28; }
+
+/* ── Keyframes ────────────────────────────────────────────────────── */
+@keyframes scandown {
+  0%   { top: -2px; }
+  100% { top: 100%; }
+}
+
+@keyframes blip {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.15; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 4px currentColor; }
+  50%       { box-shadow: 0 0 12px currentColor; }
+}
+
+/* ── Status dots ──────────────────────────────────────────────────── */
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.status-dot.READY    { background: #00ff66; box-shadow: 0 0 5px #00ff6666; }
+.status-dot.LOADING  { background: #ffaa00; animation: blip 0.7s ease-in-out infinite; }
+.status-dot.STREAMING{ background: #00ccff; animation: blip 0.5s ease-in-out infinite; }
+.status-dot.ERROR    { background: #ff3333; box-shadow: 0 0 4px #ff333366; }
+.status-dot.INIT     { background: #333333; }
+
+/* ── Module tabs ──────────────────────────────────────────────────── */
+.module-tab {
+  flex: 1;
+  min-width: 72px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #0a5520;
+  cursor: pointer;
+  padding: 9px 4px 7px;
+  font-family: inherit;
+  font-size: 8px;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+  text-align: center;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.module-tab:hover {
+  color: #00cc66;
+  border-bottom-color: #00cc6640;
+  background: #020f06;
+}
+.module-tab.active {
+  border-bottom-color: var(--module-color);
+  color: var(--module-color);
+  background: #021508;
+}
+
+.tab-icon {
+  display: block;
+  font-size: 11px;
+  margin-bottom: 3px;
+  font-weight: bold;
+}
+
+/* ── Action button ────────────────────────────────────────────────── */
+.action-btn {
+  background: transparent;
+  border: 1px solid #0a5525;
+  color: #00aa44;
+  cursor: pointer;
+  padding: 5px 14px;
+  font-family: inherit;
+  font-size: 9px;
+  letter-spacing: 2px;
+  border-radius: 2px;
+  transition: all 0.15s;
+}
+.action-btn:hover:not(:disabled) {
+  border-color: #00ff66;
+  color: #00ff66;
+  background: #020f06;
+}
+.action-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ── Panel footer strip ───────────────────────────────────────────── */
+.panel-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-top: 1px solid #0a1a08;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
