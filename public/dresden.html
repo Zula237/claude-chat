@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0d1117">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>🗺 Dresden 02.05.2026</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #1c2128;
+      --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+      --amber: #f59e0b; --green: #22c55e; --orange: #f97316; --red: #ef4444; --blue: #60a5fa;
+    }
+
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh; padding-bottom: 60px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* HEADER */
+    .hdr {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(13,17,23,0.93);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px 10px;
+    }
+    .hdr-r1 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+    .hdr-title { font-size: 17px; font-weight: 700; color: var(--amber); letter-spacing: .3px; }
+    .hdr-clock { font-family: 'SF Mono','Courier New',monospace; font-size: 14px; color: var(--muted); letter-spacing: .5px; }
+    .hdr-r2 { display: flex; gap: 14px; font-size: 12px; color: var(--muted); }
+
+    /* PROGRESS */
+    .prog { padding: 9px 16px; background: var(--bg2); border-bottom: 1px solid var(--border); }
+    .prog-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); font-family: monospace; margin-bottom: 5px; }
+    .prog-track { height: 4px; background: var(--bg3); border-radius: 99px; overflow: hidden; }
+    .prog-fill { height: 100%; background: var(--amber); border-radius: 99px; transition: width .5s ease; }
+    .prog-txt { font-size: 11px; color: var(--muted); font-family: monospace; margin-top: 4px; }
+
+    /* BANNER */
+    .banner {
+      margin: 14px 16px; padding: 16px;
+      background: rgba(245,158,11,.07); border: 1px solid rgba(245,158,11,.25);
+      border-radius: 12px; text-align: center;
+    }
+    .banner-em { font-size: 30px; }
+    .banner-title { font-size: 17px; font-weight: 700; color: var(--amber); margin-top: 5px; }
+    .banner-sub { font-size: 13px; color: var(--muted); margin-top: 4px; line-height: 1.55; }
+
+    /* TIMELINE */
+    .tl { padding: 14px 16px; position: relative; }
+    .tl-line {
+      position: absolute; left: 33px; top: 14px; bottom: 14px;
+      width: 2px;
+      background: linear-gradient(180deg,rgba(245,158,11,.8) 0%,rgba(245,158,11,.25) 70%,rgba(245,158,11,.04) 100%);
+    }
+    .stop { display: flex; gap: 10px; margin-bottom: 10px; position: relative; z-index: 1; }
+    .stop-dc { flex-shrink: 0; width: 36px; display: flex; justify-content: center; padding-top: 18px; }
+    .dot {
+      width: 18px; height: 18px; border-radius: 50%; border: 2px solid;
+      background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 9px;
+    }
+    .dot.now { animation: beacon 2s ease-in-out infinite; }
+    @keyframes beacon {
+      0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,.5); }
+      60% { box-shadow: 0 0 0 9px rgba(245,158,11,0); }
+    }
+
+    /* CARD */
+    .card { flex: 1; background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color .2s; }
+    .card.now { border-color: rgba(245,158,11,.6); box-shadow: 0 0 0 1px rgba(245,158,11,.1); }
+    .card.done { opacity: .5; }
+
+    .here-bar {
+      display: flex; align-items: center; gap: 7px;
+      padding: 6px 12px;
+      background: rgba(245,158,11,.08); border-bottom: 1px solid rgba(245,158,11,.2);
+      font-size: 10px; font-family: monospace; letter-spacing: 2px; color: var(--amber); text-transform: uppercase;
+    }
+    .here-pip { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); animation: pip 1.4s ease-in-out infinite; }
+    @keyframes pip { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+    .card-hdr {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 13px; cursor: pointer; user-select: none;
+      -webkit-tap-highlight-color: transparent; min-height: 64px;
+    }
+    .card-hdr:active { background: rgba(255,255,255,.02); }
+    .em { font-size: 22px; flex-shrink: 0; line-height: 1; }
+    .tc { flex: 1; min-width: 0; }
+    .t-time { font-family: monospace; font-size: 10px; color: var(--muted); margin-bottom: 1px; letter-spacing: .5px; }
+    .t-name { font-size: 15px; font-weight: 600; line-height: 1.25; }
+    .t-name.done-n { text-decoration: line-through; color: var(--muted); }
+    .t-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .card-rt { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+    .chev { color: var(--muted); font-size: 13px; transition: transform .25s; line-height: 1; }
+    .chev.open { transform: rotate(180deg); }
+
+    /* BADGES */
+    .badge { font-family: monospace; font-size: 9px; font-weight: 700; letter-spacing: .5px; padding: 2px 5px; border-radius: 4px; text-transform: uppercase; white-space: nowrap; }
+    .b-open { background: rgba(34,197,94,.12); color: var(--green); border: 1px solid rgba(34,197,94,.3); }
+    .b-soon { background: rgba(249,115,22,.12); color: var(--orange); border: 1px solid rgba(249,115,22,.3); animation: blink 1.5s step-end infinite; }
+    .b-closed { background: rgba(239,68,68,.1); color: var(--red); border: 1px solid rgba(239,68,68,.25); }
+    .b-free { background: rgba(139,148,158,.1); color: var(--muted); border: 1px solid var(--border); }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.45} }
+
+    /* BODY */
+    .card-body { max-height: 0; overflow: hidden; transition: max-height .35s cubic-bezier(.4,0,.2,1); }
+    .card-body.open { max-height: 1000px; }
+    .card-inner { padding: 0 13px 14px; border-top: 1px solid var(--border); }
+
+    .vibe { font-size: 13px; font-style: italic; color: var(--text); line-height: 1.55; padding: 11px 0 9px; border-bottom: 1px solid var(--border); margin-bottom: 9px; }
+
+    .tips { list-style: none; margin-bottom: 10px; }
+    .tips li { font-size: 13px; padding: 5px 0 5px 16px; position: relative; border-bottom: 1px solid rgba(48,54,61,.6); line-height: 1.4; }
+    .tips li:last-child { border-bottom: none; }
+    .tips li::before { content: '›'; position: absolute; left: 0; color: var(--amber); font-weight: bold; }
+
+    .practical { font-family: monospace; font-size: 11px; color: var(--muted); background: var(--bg3); border: 1px solid var(--border); border-radius: 7px; padding: 8px 10px; margin-bottom: 10px; line-height: 1.65; }
+    .note-box { font-size: 12px; color: var(--orange); background: rgba(249,115,22,.07); border: 1px solid rgba(249,115,22,.22); border-radius: 7px; padding: 9px 10px; margin-bottom: 10px; line-height: 1.5; }
+
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 9px 13px; border-radius: 9px; font-size: 13px; font-weight: 600;
+      border: 1px solid; cursor: pointer; text-decoration: none;
+      -webkit-tap-highlight-color: transparent; min-height: 42px;
+      font-family: inherit; transition: opacity .15s; background: transparent;
+    }
+    .btn:active { opacity: .65; }
+    .btn-map { color: var(--blue); border-color: rgba(96,165,250,.3); background: rgba(96,165,250,.08); }
+    .btn-chk { color: var(--muted); border-color: var(--border); background: var(--bg3); }
+    .btn-chk.checked { color: var(--green); border-color: rgba(34,197,94,.3); background: rgba(34,197,94,.08); }
+
+    .transit { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 12px; color: var(--muted); font-family: monospace; }
+
+    /* FOOTER */
+    .ftr { margin: 14px 16px 0; background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 15px; }
+    .ftr-title { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--amber); font-family: monospace; margin-bottom: 11px; }
+    .ftr-row { display: flex; gap: 8px; font-size: 13px; color: var(--muted); margin-bottom: 6px; align-items: flex-start; line-height: 1.4; }
+    .ftr-row strong { color: var(--text); }
+
+    @media (min-width: 520px) { body { max-width: 520px; margin: 0 auto; } }
+  </style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-r1">
+    <div class="hdr-title">🗺 Dresden — 02.05.2026</div>
+    <div class="hdr-clock" id="clock">--:--:--</div>
+  </div>
+  <div class="hdr-r2">
+    <span>☀️ Slunečno, teplé odpoledne</span>
+    <span>👥 ty + Gábi</span>
+  </div>
+</header>
+
+<div class="prog">
+  <div class="prog-lbl">Postup mise</div>
+  <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  <div class="prog-txt" id="progTxt">0 / 7 zastávek</div>
+</div>
+
+<div id="banner" style="display:none"></div>
+
+<div class="tl">
+  <div class="tl-line"></div>
+  <div id="stops"></div>
+</div>
+
+<div class="ftr">
+  <div class="ftr-title">🅿 Centrum Galerie — parkování</div>
+  <div class="ftr-row">📍 <span><strong>Vjezd:</strong> Reitbahnstraße, Dresden</span></div>
+  <div class="ftr-row">⬆️ <span><strong>Max. výška vozu:</strong> 2,10 m</span></div>
+  <div class="ftr-row">🔢 <span><strong>Kapacita:</strong> 1 069 míst, 24 h / 7 dní</span></div>
+  <div class="ftr-row">⚠️ <span>Vjezd z Reitbahnstraße — ne z Prager Straße!</span></div>
+</div>
+
+<script>
+'use strict';
+
+const STOPS = [
+  {
+    id:0, tl:'10:00', th:10, tm:0,
+    name:'Odjezd z Ústí nad Labem', sub:'Start mise', em:'🚗', col:'#6b7280',
+    oh:null, om:null, ch:null, cm:null, lh:null,
+    vibe:'Kafe do termosky, mapa stažená offline, baterky nabité. Rodiče dostávají kola — my startujeme výpravu.',
+    tips:[
+      'Předat klíče od kol a domluvit místo a čas vyzvednutí',
+      'Navigace: Körnerplatz, Dresden-Loschwitz',
+      'A17 přes hraniční přechod Breitenau — ráno bez front',
+      'Playlist? Právě teď.'
+    ],
+    pr:null, note:null, mq:null, tr:null
+  },
+  {
+    id:1, tl:'~11:00', th:11, tm:0,
+    name:'Blaues Wunder — Loschwitz', sub:'Loschwitzer Brücke', em:'🌉', col:'#3b82f6',
+    oh:null, om:null, ch:null, cm:null, lh:null,
+    vibe:'Most z roku 1893, který přežil válku. Drážďany se tady dívají samy na sebe — výhled na Labe a vinohrady.',
+    tips:[
+      'Nejlepší výhled: přímo z mostu nebo z teras Körnerplatzu',
+      'Körnerplatz: kavárny a zmrzlinářství — ranní kafe',
+      'Schwebebahn (visutá tramvaj) — volitelný bonus nahoru na kopec',
+      'Procházka vinohradnickou čtvrtí podél Labe'
+    ],
+    pr:'🚶 Volný přístup 24/7 | Körnerplatz / Schillerplatz',
+    note:null, mq:'Blaues+Wunder+Dresden', tr:'🚊 Tram 6 nebo 12 → Schillerplatz'
+  },
+  {
+    id:2, tl:'~12:30', th:12, tm:30,
+    name:'Watzke Brauhaus — Pieschen', sub:'Kötzschenbroder Str. 1', em:'🍺', col:'#f59e0b',
+    oh:11, om:0, ch:24, cm:0, lh:null,
+    vibe:'Pivovarské nádvoří přímo u Labe, od roku 1898. Vlastní pivo, terasa s výhledem na řeku, drážďanský klasik.',
+    tips:[
+      'Otevírá v 11:00 — v sobotu místo bez problémů',
+      'Vlastní ležák: Watzke Helles nebo Dunkel — obě výborné',
+      'Oběd: svíčková, knedlíky — nebo jen pivo + předkrm',
+      'Terasa u vody — dnes hezky, sedět venku',
+      'Zastávka Altpieschen je 2 min pěšky od pivovaru'
+    ],
+    pr:'🕐 Pá–So 11:00–půlnoc | Kötzschenbroder Str. 1, Pieschen',
+    note:null, mq:'Watzke+Brauhaus+Pieschen+Dresden', tr:'🚊 Tram 4 nebo 9 → Altpieschen'
+  },
+  {
+    id:3, tl:'~14:30', th:14, tm:30,
+    name:'Banksy — Ostra-Areal', sub:'Magdeburger Str. 10', em:'🎨', col:'#ec4899',
+    oh:10, om:0, ch:20, cm:0, lh:19,
+    vibe:'Kurátorsky sestavená přehlídka Banksyho díla v industriálním areálu na ostrově v Labi. Reprodukce — ale skvěle zpracovaná show.',
+    tips:[
+      'Vstup nutno stihnout do 19:00 — výstava zavírá ve 20:00',
+      'Ostra-Areal = bývalý výstaviště na ostrově — atmosféra sama o sobě stojí za to',
+      'Fotit smíš vše, bez omezení',
+      'Zarezervovat online předem — sobota bývá plno',
+      'Naplánovat aspoň 60–90 minut na procházení'
+    ],
+    pr:'🕐 So 10:00–20:00 | Poslední vstup 19:00 | Magdeburger Str. 10',
+    note:'⚠️ Jde o reprodukce, ne originální Banksyho díla. Správný mindset: retrospektiva tvorby — ne aukční síň s originals.',
+    mq:'Ostra-Areal+Dresden', tr:'🚊 Tram 1, 2 nebo 6 → Ostraallee'
+  },
+  {
+    id:4, tl:'~16:00', th:16, tm:0,
+    name:'Kunsthofpassage — Neustadt', sub:'Görlitzer Str. 21–25', em:'✨', col:'#8b5cf6',
+    oh:null, om:null, ch:null, cm:null, lh:null,
+    vibe:'Pět propojených dvorků, každý jiný svět. Jeden zpívá při dešti, jeden má mozaikové fantastické zvíře. Drážďanský poklad.',
+    tips:[
+      'Volný průchod — zdarma 24/7',
+      'Hof der Elemente: dům s trubkami — při dešti hraje muziku',
+      'Hof der Fabelwesen: mozaikové fantastické bytosti na fasádách',
+      'Vstup z Görlitzer Str. 21–25 nebo z Alaunstraße 70',
+      'Okolní Neustadt: vintage shopy, kavárny, živá alternativní scéna'
+    ],
+    pr:'🚶 Volný průchod 24/7 | Görlitzer Str. 21–25, Neustadt',
+    note:null, mq:'Kunsthofpassage+Dresden', tr:'🚊 Tram 11 → Louisenstraße'
+  },
+  {
+    id:5, tl:'~17:30', th:17, tm:30,
+    name:'TK Maxx — Prager Straße', sub:'Prager Str. 3b + Centrum Galerie', em:'🛍️', col:'#10b981',
+    oh:9, om:30, ch:20, cm:0, lh:null,
+    vibe:'Finální nákupní kapitola. TK Maxx a Centrum Galerie v jednom bloku — zaparkovat, nakoupit, sbalit to.',
+    tips:[
+      'TK Maxx zavírá přesně v 20:00 — vejít s rezervou, ne za pět dvanáct',
+      'Centrum Galerie parking: vjezd z Reitbahnstraße (ne z Prager Straße!)',
+      'Max. výška v parkovišti: 2,10 m — zkontrolovat auto',
+      'Zaparkovat nejdřív, pak jít pěšky do TK Maxx',
+      'Prager Straße: pěší zóna, okolní obchody otevřeny do 20:00'
+    ],
+    pr:'🕐 So 09:30–20:00 | Prager Str. 3b, Dresden',
+    note:null, mq:'TK+Maxx+Prager+Stra%C3%9Fe+Dresden', tr:null
+  },
+  {
+    id:6, tl:'~19:00', th:19, tm:0,
+    name:'Pickup rodičů + odjezd', sub:'Mise splněna', em:'🏁', col:'#6b7280',
+    oh:null, om:null, ch:null, cm:null, lh:null,
+    vibe:'Rodiče unavení, spokojení, s Labem v nohách. My taky. Domů po A17.',
+    tips:[
+      'Koordinovat SMS/telefon — místo vyzvednutí domluvit předem',
+      'Centrum Galerie parking funguje 24/7 — žádný spěch',
+      'A17 zpět do Ústí: cca 60–70 minut',
+      'Zkontrolovat palivo před odjezdem nebo zatankovat v Drážďanech'
+    ],
+    pr:null, note:null, mq:null, tr:null
+  }
+];
+
+const visited = new Set(JSON.parse(localStorage.getItem('dr_v')||'[]'));
+const expanded = new Set(JSON.parse(localStorage.getItem('dr_e')||'[]'));
+
+function save() {
+  localStorage.setItem('dr_v', JSON.stringify([...visited]));
+  localStorage.setItem('dr_e', JSON.stringify([...expanded]));
+}
+
+function toMin(h,m){ return h*60+(m||0); }
+function nowMin(d){ return d.getHours()*60+d.getMinutes(); }
+function fmtT(h,m){ if(h===24) return 'půlnoc'; return `${String(h).padStart(2,'0')}:${String(m||0).padStart(2,'0')}`; }
+
+function hStatus(s, now) {
+  if(s.oh===null) return {type:'free'};
+  const nm=nowMin(now), o=toMin(s.oh,s.om), c=s.ch===24?1440:toMin(s.ch,s.cm), last=s.lh!==null?toMin(s.lh,0):c;
+  if(nm>=last&&nm<c) return {type:'no-entry'};
+  if(nm>=o&&nm<last){
+    const left=last-nm;
+    return left<=60 ? {type:'closing',min:left,isLE:s.lh!==null} : {type:'open',closeAt:fmtT(s.ch,s.cm)};
+  }
+  if(nm<o){ const until=o-nm; return {type:until<=45?'soon':'closed',openAt:fmtT(s.oh,s.om),min:until}; }
+  return {type:'closed',openAt:fmtT(s.oh,s.om),min:0};
+}
+
+function badgeHtml(st) {
+  if(!st||st.type==='free') return `<span class="badge b-free">volný vstup</span>`;
+  if(st.type==='open') return `<span class="badge b-open">Otevřeno · do ${st.closeAt}</span>`;
+  if(st.type==='soon') return `<span class="badge b-soon">Otevírá za ${st.min} min</span>`;
+  if(st.type==='closing') return `<span class="badge b-soon">${st.isLE?'Posl. vstup za':'Zavírá za'} ${st.min} min</span>`;
+  if(st.type==='no-entry') return `<span class="badge b-closed">Vstup uzavřen</span>`;
+  return `<span class="badge b-closed">Zavřeno · otvírá ${st.openAt}</span>`;
+}
+
+function curIdx(now) {
+  const nm=nowMin(now); let ci=-1;
+  for(const s of STOPS) if(s.th!==null&&toMin(s.th,s.tm)<=nm) ci=s.id;
+  return ci;
+}
+
+function stopHtml(s, now, ci) {
+  const isNow=ci===s.id, isDone=visited.has(s.id), isOpen=expanded.has(s.id);
+  const st=hStatus(s,now);
+  return `<div class="stop">
+  <div class="stop-dc">
+    <div class="dot${isNow?' now':''}" style="border-color:${s.col};${isNow?`background:${s.col}28;`:''}">
+      ${isDone?'<span style="color:var(--green)">✓</span>':''}
+    </div>
+  </div>
+  <div class="card${isNow?' now':''}${isDone?' done':''}">
+    ${isNow?`<div class="here-bar"><div class="here-pip"></div>── JSI TADY ──</div>`:''}
+    <div class="card-hdr" onclick="tog(${s.id})">
+      <div class="em">${s.em}</div>
+      <div class="tc">
+        <div class="t-time">${s.tl}</div>
+        <div class="t-name${isDone?' done-n':''}" style="${isDone?'':'color:'+s.col}">${s.name}</div>
+        <div class="t-sub">${s.sub}</div>
+      </div>
+      <div class="card-rt">
+        ${badgeHtml(st)}
+        <div class="chev${isOpen?' open':''}">▾</div>
+      </div>
+    </div>
+    <div class="card-body${isOpen?' open':''}">
+      <div class="card-inner">
+        <div class="vibe">${s.vibe}</div>
+        <ul class="tips">${s.tips.map(t=>`<li>${t}</li>`).join('')}</ul>
+        ${s.pr?`<div class="practical">${s.pr}</div>`:''}
+        ${s.note?`<div class="note-box">${s.note}</div>`:''}
+        <div class="actions">
+          ${s.mq?`<a class="btn btn-map" href="https://maps.google.com/?q=${s.mq}" target="_blank" rel="noopener noreferrer">🗺 Navigace</a>`:''}
+          <button class="btn btn-chk${isDone?' checked':''}" onclick="chk(event,${s.id})">
+            ${isDone?'✓ Hotovo':'◯ Označit'}
+          </button>
+        </div>
+        ${s.tr?`<div class="transit">${s.tr}</div>`:''}
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
+function render() {
+  const now=new Date();
+  const isDay=now.getFullYear()===2026&&now.getMonth()===4&&now.getDate()===2;
+  const isPre=now<new Date('2026-05-02');
+
+  document.getElementById('clock').textContent=
+    now.toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+
+  const bannerEl=document.getElementById('banner');
+  if(!isDay) {
+    bannerEl.className='banner'; bannerEl.style.display='';
+    if(isPre){
+      const ms=new Date('2026-05-02T10:00:00')-now;
+      const d=Math.floor(ms/86400000), h=Math.floor((ms%86400000)/3600000), m=Math.floor((ms%3600000)/60000);
+      bannerEl.innerHTML=`<div class="banner-em">⏳</div><div class="banner-title">Mise se blíží</div>
+<div class="banner-sub">Za ${d>0?d+'d ':''} ${h}h ${m}min startuje výprava do Drážďan.<br>Zatím si to prohlížíš — <strong>to taky jde</strong>.</div>`;
+    } else {
+      bannerEl.innerHTML=`<div class="banner-em">🏆</div><div class="banner-title">Mise splněna</div>
+<div class="banner-sub">Drážďany 02.05.2026 jsou za námi. Dobrej výlet.</div>`;
+    }
+  } else { bannerEl.style.display='none'; }
+
+  const ci=isDay?curIdx(now):-1;
+  document.getElementById('stops').innerHTML=STOPS.map(s=>stopHtml(s,now,ci)).join('');
+
+  const done=visited.size, total=STOPS.length;
+  document.getElementById('progFill').style.width=Math.round(done/total*100)+'%';
+  document.getElementById('progTxt').textContent=`${done} / ${total} zastávek hotovo`;
+}
+
+window.tog=function(id){ expanded.has(id)?expanded.delete(id):expanded.add(id); save(); render(); };
+window.chk=function(e,id){ e.stopPropagation(); visited.has(id)?visited.delete(id):visited.add(id); save(); render(); };
+
+// Auto-expand current stop on first load (trip day only)
+(function(){
+  const now=new Date();
+  if(now.getFullYear()===2026&&now.getMonth()===4&&now.getDate()===2){
+    const ci=curIdx(now);
+    if(ci>=0&&!expanded.has(ci)){ expanded.add(ci); save(); }
+  }
+})();
+
+render();
+setInterval(render, 30000);
+</script>
+</body>
+</html>
